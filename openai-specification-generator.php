@@ -202,8 +202,6 @@ function wp_openapi_generator_settings_page() {
 ?>
 
 </form>
-<?php echo 'Form submitted: ' . isset($_POST['submit']) . ', ' . isset($_POST['generate_file']); ?>
-
 
     <script>
         (function($) {
@@ -221,11 +219,6 @@ function wp_openapi_generator_settings_page() {
 </div>
 <?php
 }
-
-
-
-
-
 
 function wp_openapi_generator_generate_oas() {
     // Discover all REST API endpoints
@@ -317,7 +310,6 @@ function wp_openapi_generator_generate_oas() {
 
 // Save the generated OAS JSON in a publicly accessible folder
 function wp_openapi_generator_save_oas_json($oas_json) {
-    var_dump($oas_json);
     $upload_dir = wp_upload_dir();
     $oas_dir = $upload_dir['basedir'] . '/openapi-spec';
     $oas_file = $oas_dir . '/openapi-spec.json';
@@ -343,8 +335,8 @@ if (false === $result) {
 // Add the plugin settings page to the WordPress admin menu
 add_action('admin_menu', function () {
     add_options_page(
-        'WP OpenAPI Generator',
-        'WP OpenAPI Generator',
+        'OpenAI Specification Generator',
+        'OpenAI Specification Generator',
         'manage_options',
         'wp-openapi-generator',
         'wp_openapi_generator_settings_page'
