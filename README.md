@@ -1,0 +1,1 @@
+# wp-openai-generator
