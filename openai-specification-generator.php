@@ -160,10 +160,10 @@ function wp_openapi_generator_settings_page() {
                             <a href="<?php echo esc_url(rest_url($endpoint['route'])); ?>" target="_blank"><?php echo esc_html($endpoint['route']); ?></a>
                         </td>
                         <td>
-                            <textarea name="wp_openapi_generator_endpoints[<?php echo esc_attr($endpoint['route']); ?>][summary]"> <?php echo esc_textarea(isset($endpoints_settings[$endpoint['route']]['summary']) ? $endpoints_settings[$endpoint['route']]['summary'] : ''); ?></textarea>
+                            <textarea style="width:90%" name="wp_openapi_generator_endpoints[<?php echo esc_attr($endpoint['route']); ?>][summary]"> <?php echo esc_textarea(isset($endpoints_settings[$endpoint['route']]['summary']) ? $endpoints_settings[$endpoint['route']]['summary'] : ''); ?></textarea>
                         </td>
                         <td>
-                            <textarea name="wp_openapi_generator_endpoints[<?php echo esc_attr($endpoint['route']); ?>][description]"><?php echo esc_textarea(isset($endpoints_settings[$endpoint['route']]['description']) ? $endpoints_settings[$endpoint['route']]['description'] : ''); ?></textarea>
+                            <textarea style="width:90%" name="wp_openapi_generator_endpoints[<?php echo esc_attr($endpoint['route']); ?>][description]"><?php echo esc_textarea(isset($endpoints_settings[$endpoint['route']]['description']) ? $endpoints_settings[$endpoint['route']]['description'] : ''); ?></textarea>
                         </td>
 
                     </tr>
