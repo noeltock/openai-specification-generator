@@ -41,47 +41,34 @@ function wp_openapi_generator_deactivate() {
 
 // Discover and list all REST API endpoints
 function wp_openapi_generator_discover_endpoints() {
-    $endpoints = [];
+    $endpoints = array();
 
-    // Get the REST API server instance
-    $rest_server = rest_get_server();
+    // Get all the registered REST routes
+    $routes = rest_get_server()->get_routes();
 
-    // Get all registered routes
-    $routes = $rest_server->get_routes();
-
-    // Loop through the routes and extract endpoint data
     foreach ($routes as $route => $route_data) {
         foreach ($route_data as $handler) {
-            $methods = implode(', ', array_keys($handler['methods']));
+            if (isset($handler['callback']) && is_array($handler['callback'])) {
+                // Filter out dynamic endpoints
+                if (strpos($route, '(?P<') === false) {
+                    // Check if the endpoint already exists in the array
+                    $route_exists = false;
+                    foreach ($endpoints as $existing_endpoint) {
+                        if ($existing_endpoint['route'] === $route) {
+                            $route_exists = true;
+                            break;
+                        }
+                    }
 
-            $endpoints[] = [
-                'route' => $route,
-                'methods' => $methods,
-                'callback' => $handler['callback'],
-                'args' => $handler['args'],
-            ];
-        }
-    }
-
-    // Include custom post types endpoints
-    $post_types = get_post_types(['public' => true, '_builtin' => false], 'objects');
-    foreach ($post_types as $post_type) {
-        if (isset($post_type->rest_base)) {
-            $rest_base = $post_type->rest_base;
-
-            $endpoints[] = [
-                'route' => "/wp/v2/{$rest_base}",
-                'methods' => 'GET, POST',
-                'callback' => null,
-                'args' => [],
-            ];
-
-            $endpoints[] = [
-                'route' => "/wp/v2/{$rest_base}/{id}",
-                'methods' => 'GET, PUT, DELETE',
-                'callback' => null,
-                'args' => [],
-            ];
+                    // Add the endpoint if it doesn't exist
+                    if (!$route_exists) {
+                        $endpoints[] = array(
+                            'route' => $route,
+                            'methods' => $handler['methods'],
+                        );
+                    }
+                }
+            }
         }
     }
 
@@ -90,27 +77,21 @@ function wp_openapi_generator_discover_endpoints() {
 
 // Create the plugin settings page
 function wp_openapi_generator_settings_page() {
-
-    // Check if the OAS has been generated and show a success message if needed
-    if (isset($_GET['oas_generated']) && $_GET['oas_generated'] === '1' && isset($_GET['oas_url'])) {
-        $oas_url = esc_url($_GET['oas_url']);
-        ?>
-        <div class="notice notice-success is-dismissible">
-            <p>
-                <?php esc_html_e('The OpenAPI Specification JSON has been generated successfully:', 'wp-openapi-generator'); ?>
-                <a href="<?php echo $oas_url; ?>" target="_blank"><?php echo $oas_url; ?></a>
-            </p>
-        </div>
-        <?php
-    }
-
     // Discover all REST API endpoints
     $endpoints = wp_openapi_generator_discover_endpoints();
+
+    // Get the OAS URL from the saved JSON file
+    $upload_dir = wp_upload_dir();
+    $oas_url = $upload_dir['baseurl'] . '/openapi-spec/openapi-spec.json';
 
     // Create the plugin settings page
     ?>
     <div class="wrap">
         <h1><?php esc_html_e('WP OpenAPI Generator', 'wp-openapi-generator'); ?></h1>
+        <p>
+            <?php esc_html_e('The current OpenAPI Specification JSON file is available at:', 'wp-openapi-generator'); ?>
+            <a href="<?php echo esc_url($oas_url); ?>" target="_blank"><?php echo esc_html($oas_url); ?></a>
+        </p>
         <form method="post" action="options.php">
             <?php
             settings_fields('wp_openapi_generator_settings');
@@ -121,12 +102,22 @@ function wp_openapi_generator_settings_page() {
                 <?php
                 foreach ($endpoints as $index => $endpoint) {
                     $route = esc_html($endpoint['route']);
+                    $endpoint_url = get_rest_url() . ltrim($route, '/');
                     ?>
                     <tr>
                         <th scope="row">
-                            <label for="wp_openapi_generator_endpoints_<?php echo $index; ?>_route"><?php echo $route; ?></label>
+                            <label for="wp_openapi_generator_endpoints_<?php echo $index; ?>_route">
+                                <a href="<?php echo esc_url($endpoint_url); ?>" target="_blank"><?php echo $route; ?></a>
+                            </label>
                         </th>
                         <td>
+                            <input type="checkbox"
+                                   id="wp_openapi_generator_endpoints_<?php echo $index; ?>_include"
+                                   name="wp_openapi_generator_endpoints[<?php echo $index; ?>][include]"
+                                   value="1"
+                                   <?php checked(get_option("wp_openapi_generator_endpoints[{$index}][include]"), 1); ?>>
+                            <?php esc_html_e('Include in the specification', 'wp-openapi-generator'); ?>
+                            <br><br>
                             <input type="text"
                                    id="wp_openapi_generator_endpoints_<?php echo $index; ?>_summary"
                                    name="wp_openapi_generator_endpoints[<?php echo $index; ?>][summary]"
@@ -151,6 +142,7 @@ function wp_openapi_generator_settings_page() {
     </div>
     <?php
 }
+
 
 // Generate the OpenAPI Specification (OAS) 3.1 JSON
 function wp_openapi_generator_generate_oas() {
