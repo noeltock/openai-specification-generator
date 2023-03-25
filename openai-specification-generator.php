@@ -130,7 +130,8 @@ function wp_openapi_generator_settings_page() {
         <a href="#filters" class="nav-tab"><?php esc_html_e('Filters', 'wp-openapi-generator'); ?></a>
     </h2>
 
-    <form method="post" action="<?php echo esc_url(admin_url('admin.php?page=wp-openapi-generator')); ?>">
+    <form method="post" action="<?php echo esc_url(admin_url('options.php')); ?>">
+
 
         <?php settings_fields('wp_openapi_generator_options_group'); ?>
         <?php do_settings_sections('wp_openapi_generator_options_group'); ?>
@@ -181,10 +182,10 @@ function wp_openapi_generator_settings_page() {
         </div>
 
         <?php wp_nonce_field('wp_openapi_generator_generate_oas', 'wp_openapi_generator_generate_oas_nonce'); ?>
+
         <?php submit_button(__('Save Changes', 'wp-openapi-generator'), 'primary', 'submit', false); ?>
 
         <input type="submit" name="generate_file" id="generate_file" class="button button-primary" value="<?php esc_attr_e('Generate File', 'wp-openapi-generator'); ?>">
-
 
         <?php
 
@@ -338,7 +339,7 @@ add_action('admin_menu', function () {
         'OpenAI Specification Generator',
         'OpenAI Specification Generator',
         'manage_options',
-        'wp-openapi-generator',
+        'openapi-specification-generator',
         'wp_openapi_generator_settings_page'
     );
 });
@@ -375,7 +376,7 @@ add_action('admin_post_generate_oas', function () {
 
     // Redirect back to the plugin settings page with a success message and the OAS URL
     $redirect_url = add_query_arg([
-        'page' => 'wp-openapi-generator',
+        'page' => 'openapi-specification-generator',
         'oas_generated' => '1',
         'oas_url' => urlencode($oas_url),
     ], admin_url('options-general.php'));
