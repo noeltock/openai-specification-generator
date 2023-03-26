@@ -1,6 +1,6 @@
 ## WordPress - OpenAI Specification Generator
 
-OpenAPI Generator is a WordPress plugin that helps users generate an OpenAPI Specification (OAS) for the REST API endpoints of their WordPress website. Users can manage the endpoint details, add custom summaries and descriptions, and decide which endpoints to include in the generated OAS.
+OpenAI Generator is a WordPress plugin that helps users generate an OpenAI Specification (OAS) for the REST API endpoints of their WordPress website. Users can manage the endpoint details, add custom summaries and descriptions, and decide which endpoints to include in the generated OAS.
 
 Features:
 
